@@ -1,0 +1,95 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Commands\GenerateCakeScheduleCommand;
+use App\Utils\CsvFilePathValidator;
+
+// -----------------------------------------------------------------------------
+// Default values
+// -----------------------------------------------------------------------------
+$input  = __DIR__ . '/../data/employees.txt';
+$output = __DIR__ . '/../output/cakes.csv';
+$year   = (int) date('Y');
+
+// -----------------------------------------------------------------------------
+// Parse CLI arguments: --input=..., --output=..., --year=..., --help
+// -----------------------------------------------------------------------------
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--input=')) {
+        $input = substr($arg, strlen('--input='));
+    } elseif (str_starts_with($arg, '--output=')) {
+        $output = substr($arg, strlen('--output='));
+    } elseif (str_starts_with($arg, '--year=')) {
+        $year = (int) substr($arg, strlen('--year='));
+    } elseif (in_array($arg, ['-h', '--help'], true)) {
+        echo <<<HELP
+🍰  Cake Scheduler — Generate birthday cake days for employees
+
+Usage:
+  bin/cake-scheduler [options]
+
+Options:
+  --input=PATH      Path to employees input file (default: data/employees.txt)
+  --output=PATH     Path to CSV output file       (default: output/cakes.csv)
+  --year=YYYY       Target year for scheduling    (default: current year)
+  -h, --help        Show this help message
+
+Examples:
+  bin/cake-scheduler
+  bin/cake-scheduler --year=2025
+  bin/cake-scheduler --input=data/employees.txt --output=output/cakes.csv --year=2025
+
+Output:
+  Generates a CSV file with columns:
+  Date, Number of Small Cakes, Number of Large Cakes, Names of people getting cake
+
+HELP;
+        exit(0);
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Validate input file and year
+// -----------------------------------------------------------------------------
+if (!is_file($input)) {
+    fwrite(STDERR, "❌ Input file not found: {$input}\n");
+    exit(1);
+}
+
+if ($year < 1900 || $year > 3000) {
+    fwrite(STDERR, "❌ Invalid year: {$year}\n");
+    exit(1);
+}
+
+// -----------------------------------------------------------------------------
+// Validate output file
+// -----------------------------------------------------------------------------
+$outputFileValidator = new CsvFilePathValidator($output);
+if ($outputFileValidator->hasErrors()) {
+    foreach ($outputFileValidator->getErrors() as $err) {
+        echo " ❌ $err\n";
+    }
+    exit(1);
+}
+$output = $outputFileValidator->getFilePath();
+
+// -----------------------------------------------------------------------------
+// Execute the command
+// -----------------------------------------------------------------------------
+$command = new GenerateCakeScheduleCommand();
+$command->handle($input, $output, $year);
+
+if ($command->hasErrors()) {
+    echo "Warnings encountered:\n";
+    foreach ($command->getErrors() as $err) {
+        echo " ❌ $err\n";
+    }
+}
+
+$realOutput = realpath($output);
+echo "🎂 Cake schedule for $year generated successfully: " . ($realOutput ?: $output) . "\n";
+
