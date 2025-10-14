@@ -11,6 +11,14 @@ class CsvWriter
     public function __construct(string $filePath)
     {
         try {
+            $dir = dirname($filePath);
+            if (!is_dir($dir)) {
+                if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+                    $this->addError("Failed to create directory: $dir");
+                    return;
+                }
+            }
+
             $this->handle = fopen($filePath, 'w');
             if (!$this->handle) {
                 $this->addError("Cannot open file for writing: $filePath");
