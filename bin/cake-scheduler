@@ -27,7 +27,7 @@ foreach ($argv as $arg) {
         $year = (int) substr($arg, strlen('--year='));
     } elseif (in_array($arg, ['-h', '--help'], true)) {
         echo <<<HELP
-🍰  Cake Scheduler — Generate birthday cake days for employees
+Cake Scheduler - Generate birthday cake days for employees
 
 Usage:
   bin/cake-scheduler [options]
@@ -56,12 +56,12 @@ HELP;
 // Validate input file and year
 // -----------------------------------------------------------------------------
 if (!is_file($input)) {
-    fwrite(STDERR, "❌ Input file not found: {$input}\n");
+    fwrite(STDERR, "Input file not found: {$input}\n");
     exit(1);
 }
 
 if ($year < 1900 || $year > 3000) {
-    fwrite(STDERR, "❌ Invalid year: {$year}\n");
+    fwrite(STDERR, "Invalid year: {$year}\n");
     exit(1);
 }
 
@@ -71,7 +71,7 @@ if ($year < 1900 || $year > 3000) {
 $outputFileValidator = new CsvFilePathValidator($output);
 if ($outputFileValidator->hasErrors()) {
     foreach ($outputFileValidator->getErrors() as $err) {
-        echo " ❌ $err\n";
+        echo "$err\n";
     }
     exit(1);
 }
@@ -86,10 +86,10 @@ $command->handle($input, $output, $year);
 if ($command->hasErrors()) {
     echo "Warnings encountered:\n";
     foreach ($command->getErrors() as $err) {
-        echo " ❌ $err\n";
+        echo "$err\n";
     }
 }
 
 $realOutput = realpath($output);
-echo "🎂 Cake schedule for $year generated successfully: " . ($realOutput ?: $output) . "\n";
+echo "Cake schedule for $year generated successfully: " . ($realOutput ?: $output) . "\n";
 

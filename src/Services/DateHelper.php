@@ -2,14 +2,11 @@
 
 namespace App\Services;
 
-use App\Utils\HasErrorsTrait;
 use DateInterval;
 use DateTimeImmutable;
 
 class DateHelper
 {
-    use HasErrorsTrait;
-
     private const HOLIDAYS = ['01-01', '12-25', '12-26'];
     private static array $holidayCache = [];
 
@@ -34,7 +31,11 @@ class DateHelper
     {
         $key = $date->format('Y-m-d');
 
-        return self::$holidayCache[$key] ??= in_array($date->format('m-d'), self::HOLIDAYS, true);
+        if (!isset(self::$holidayCache[$key])) {
+            self::$holidayCache[$key] = in_array($date->format('m-d'), self::HOLIDAYS, true);
+        }
+
+        return self::$holidayCache[$key];
     }
 
     /**
@@ -56,14 +57,10 @@ class DateHelper
      */
     public function nextWorkdayAfter(DateTimeImmutable $date): DateTimeImmutable
     {
-        $limit = 400;
         $current = $date->add(new DateInterval('P1D'));
 
         while (!$this->isWorkday($current)) {
             $current = $current->add(new DateInterval('P1D'));
-            if (--$limit <= 0) {
-                $this->addError("No workday found after {$date->format('Y-m-d')}");
-            }
         }
 
         return $current;
@@ -77,14 +74,10 @@ class DateHelper
      */
     public function nextWorkdayOnOrAfter(DateTimeImmutable $date): DateTimeImmutable
     {
-        $limit = 400;
         $current = $date;
 
         while (!$this->isWorkday($current)) {
             $current = $current->add(new DateInterval('P1D'));
-            if (--$limit <= 0) {
-                $this->addError("No workday found after {$date->format('Y-m-d')}");
-            }
         }
 
         return $current;

@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Utils\HasErrorsTrait;
 use DateTimeImmutable;
 
 class CakeScheduler
 {
-    use HasErrorsTrait;
-
     private DateHelper $helper;
     private array $schedule = [];
     private array $cakeFreeDays = [];
@@ -50,10 +47,7 @@ class CakeScheduler
         $next = $cakeDay->add(new \DateInterval('P1D'));
         $nextWorkday = $this->helper->nextWorkdayOnOrAfter($next);
         $this->cakeFreeDays[$nextWorkday->format('Y-m-d')] = true;
-
-        $this->mergeErrors($this->helper);
     }
-
 
     /**
      * Return the full cake schedule sorted by date

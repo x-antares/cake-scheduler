@@ -59,7 +59,6 @@ class GenerateCakeScheduleCommand
 
         $writer->close();
 
-        $this->mergeErrors($this->scheduler);
         $this->mergeErrors($writer);
         $this->mergeErrors($this->parser);
     }

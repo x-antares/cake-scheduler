@@ -13,7 +13,7 @@ class CsvWriter
         try {
             $dir = dirname($filePath);
             if (!is_dir($dir)) {
-                if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+                if (!mkdir($dir, 755, true) && !is_dir($dir)) {
                     $this->addError("Failed to create directory: $dir");
                     return;
                 }
